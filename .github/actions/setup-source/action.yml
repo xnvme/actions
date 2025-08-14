@@ -1,0 +1,55 @@
+---
+name: Setup xNVMe source from artifacts
+description: Download an xNVMe source archive to $GITHUB_WORKSPACE/artifacts and optionally extract it to the workspace root
+
+inputs:
+  name:
+    description: Name of the artifact to download
+    required: true
+
+  extract:
+    description: Whether to extract into the current working directory
+    required: false
+    default: 'true'
+
+  filename:
+    description: Name of the archive file
+    required: false
+    default: xnvme-src.tar.gz
+
+outputs:
+  directory:
+    description: Path to the directory containing downloaded artifacts
+    value: ${{ steps.set-outputs.outputs.directory }}
+  src_tgz:
+    description: Full path to the downloaded archive
+    value: ${{ steps.set-outputs.outputs.src_tgz }}
+
+runs:
+  using: composite
+  steps:
+    - name: Download the xNVMe source archive
+      uses: actions/download-artifact@v4.1.7
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ github.workspace }}/artifacts
+
+    - name: Extract the xNVMe source archive
+      if: ${{ inputs.extract == 'true' }}
+      shell: bash
+      run: |
+        ARCHIVE_PATH="$GITHUB_WORKSPACE/artifacts/${{ inputs.filename }}"
+        if command -v cygpath >/dev/null 2>&1; then
+          ARCHIVE_PATH="$(cygpath -u "$ARCHIVE_PATH")"
+        fi
+        echo "Extracting $ARCHIVE_PATH into $(pwd)"
+        tar --extract --gzip \
+            --file="$ARCHIVE_PATH" \
+            --strip-components=1
+
+    - name: Set outputs
+      id: set-outputs
+      shell: bash
+      run: |
+        echo "directory=$GITHUB_WORKSPACE/artifacts" >> "$GITHUB_OUTPUT"
+        echo "src_tgz=$GITHUB_WORKSPACE/artifacts/${{ inputs.filename }}" >> "$GITHUB_OUTPUT"
