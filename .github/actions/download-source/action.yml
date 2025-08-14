@@ -1,0 +1,14 @@
+---
+name: Download xNVMe source artifact
+description: Download an xNVMe source archive without extracting it
+inputs:
+  name:
+    description: Name of the artifact to download (with or without subprojects)
+    required: true
+runs:
+  using: composite
+  steps:
+  - name: Download archive
+    uses: actions/download-artifact@v4.1.7
+    with:
+      name: ${{ inputs.name }}

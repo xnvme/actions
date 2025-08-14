@@ -1,0 +1,39 @@
+---
+name: Setup xNVMe source from artifacts
+description: Download an xNVMe source archive to /tmp/artifacts and optionally extract it to the workspace root
+inputs:
+  name:
+    description: Name of the artifact to download
+    required: true
+
+  extract:
+    description: Whether to extract into the current working directory
+    required: false
+    default: 'true'
+
+  filename:
+    description: Name of the archive file
+    required: false
+    default: xnvme-src.tar.gz
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare artifact directory
+      shell: bash
+      run: mkdir -p /tmp/artifacts
+
+    - name: Download the xNVMe source archive
+      uses: actions/download-artifact@v4.1.7
+      with:
+        name: ${{ inputs.name }}
+        path: /tmp/artifacts
+
+    - name: Extract the xNVMe source archive
+      if: ${{ inputs.extract == 'true' }}
+      shell: bash
+      run: |
+        echo "Extracting /tmp/artifacts/${{ inputs.filename }} into $(pwd)"
+        tar --extract --gzip \
+            --file="/tmp/artifacts/${{ inputs.filename }}" \
+            --strip-components=1
