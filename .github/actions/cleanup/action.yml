@@ -1,0 +1,42 @@
+# .github/actions/cleanup/action.yml
+name: Cleanup self-hosted runner
+description: Ensure a clean state on self-hosted runners before starting a job
+
+runs:
+  using: composite
+  steps:
+  - name: Cleanup qemu (instances and guests)
+    shell: bash
+    run: |
+      pkill -9 -f qemu || true
+      rm -rf "$HOME/guests" || true
+
+  - name: Cleanup workspace
+    shell: bash
+    run: |
+      echo "[cleanup] Wiping contents of $GITHUB_WORKSPACE"
+      rm -rf "$GITHUB_WORKSPACE"/* "$GITHUB_WORKSPACE"/.[!.]* "$GITHUB_WORKSPACE"/..?* || true
+
+  - name: Cleanup artifacts (tmp)
+    shell: bash
+    run: |
+      echo "[cleanup] Removing /tmp/artifacts"
+      rm -rf "/tmp/artifacts" || true
+
+  - name: Cleanup Docker
+    shell: bash
+    run: |
+      if command -v docker >/dev/null 2>&1; then
+        echo "[cleanup] Pruning Docker images/containers"
+        docker system prune -af || true
+      else
+        echo "[cleanup] Docker not installed, skipping"
+      fi
+
+  - name: Debug
+    shell: bash
+    run: |
+      echo "[cleanup] debug -- find"
+      find .
+      echo "[cleanup] debug -- hostname"
+      hostname
