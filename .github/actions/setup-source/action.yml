@@ -43,7 +43,8 @@ runs:
           ARCHIVE_PATH="$(cygpath -u "$ARCHIVE_PATH")"
         fi
         echo "Extracting $ARCHIVE_PATH into $(pwd)"
-        tar --extract --gzip --touch \
+        # -m, not --touch: bsdtar on the macOS runners rejects the long form.
+        tar --extract --gzip -m \
             --file="$ARCHIVE_PATH" \
             --strip-components=1
 
