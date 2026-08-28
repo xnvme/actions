@@ -43,7 +43,7 @@ runs:
           ARCHIVE_PATH="$(cygpath -u "$ARCHIVE_PATH")"
         fi
         echo "Extracting $ARCHIVE_PATH into $(pwd)"
-        tar --extract --gzip \
+        tar --extract --gzip --touch \
             --file="$ARCHIVE_PATH" \
             --strip-components=1
 
